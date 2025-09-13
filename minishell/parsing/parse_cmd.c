@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parse.c                                            :+:      :+:    :+:   */
+/*   parse_cmd.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: haboucha <haboucha@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: rmouafik <rmouafik@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 12:50:48 by haboucha          #+#    #+#             */
-/*   Updated: 2025/07/07 13:27:59 by haboucha         ###   ########.fr       */
+/*   Updated: 2025/09/11 16:44:58 by rmouafik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,12 +167,7 @@ t_cmd *new_cmd(t_token *token)
     if(!cmd)
         return NULL;
     initilisation(cmd);
-    red = malloc(sizeof(t_redriection));
-    if(!red)
-        return(free(cmd),NULL);
     int nbr_args = count_word_in_token(token);
-    //int nbr_red = count_redirect_in_token(token);
-   // int nbr_here= count_heredoc_in_token(token);
     cmd->args = malloc(sizeof(char *) * (nbr_args + 2));
     if(!cmd->args)
         return(free(cmd),NULL);

@@ -6,7 +6,7 @@
 /*   By: rmouafik <rmouafik@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/28 12:37:38 by rmouafik          #+#    #+#             */
-/*   Updated: 2025/09/11 13:08:15 by rmouafik         ###   ########.fr       */
+/*   Updated: 2025/09/13 11:26:48 by rmouafik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -306,12 +306,7 @@ void run_herdoc(t_cmd *cmd, t_redriection *tmp, int fd, t_env **env_copy)
 	{
 		line = readline("> ");
 		if (!line)
-		{
-			ft_putstr_fd("warning: here-document delimited by end-of-file (wanted `", 2);
-            ft_putstr_fd(tmp->file_or_delim, 2);
-            ft_putstr_fd("')\n", 2);
 			break;
-		}
 		if (!ft_strcmp(line, tmp->file_or_delim))
 		{
 			free(line);

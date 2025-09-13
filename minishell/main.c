@@ -6,7 +6,7 @@
 /*   By: rmouafik <rmouafik@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/10 10:35:46 by rmouafik          #+#    #+#             */
-/*   Updated: 2025/09/11 13:07:43 by rmouafik         ###   ########.fr       */
+/*   Updated: 2025/09/13 11:38:51 by rmouafik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -218,9 +218,12 @@ void free_cmd_list(t_cmd *cmd)
         }
         if(tmp->red)
             free_red_list(tmp->red);
+		if (tmp->herdoc_fd)
+			close(tmp->herdoc_fd);
     free(tmp);
     }
 }
+
 int main(int ac, char *av[], char **envp)
 {
 	char	*input;
@@ -228,16 +231,17 @@ int main(int ac, char *av[], char **envp)
 	t_token *res = NULL;
 	t_env	*env_head;
 	char	**env_arr;
+	char	*prompt;
 	(void)ac;
 	(void)av;
 
 	env_copy(envp, &env_head);
-	char *prompt = make_prompt();
 	ft_update_shelvl(env_head);
 	env_head->exit_status = 0;
 	print_tamazirt();
 	while (1)
 	{
+		prompt = make_prompt();
 		setup_signals();
 		env_arr = env_to_arr(env_head);
 		input = readline(prompt);
@@ -247,7 +251,11 @@ int main(int ac, char *av[], char **envp)
 			g_signal = 0;
 		}
 		if (input == NULL)
+		{
+			free(prompt);
+			free_args(env_arr);
 			handle_end(env_head);
+		}
 		if (*input)
 			add_history(input);
 		if(check_synstax(input, env_head))
@@ -259,19 +267,16 @@ int main(int ac, char *av[], char **envp)
 		res = tokenize(input);
 		expand_token_list(&res, env_arr, env_head);
 		cmd = parse_cmd(res);
-		// print_cmd(cmd);
 		if (cmd)
 			ft_execute(cmd, &env_head, input);
 		free_cmd_list(cmd);
         free_token_list(res);
 		free_args(env_arr);
 		free(input);
-		// printf("%p\n", &input);
-		// printf("-->%d\n", env_head->exit_status);
+		free(prompt);
 	}
 	free_env(env_head);
 	free_args(env_arr);
-	free(prompt);
 	free(input);
 	return 0;
 }

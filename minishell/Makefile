@@ -19,7 +19,7 @@ $(NAME): $(OBJ)
 	@make clean
 
 %.o: %.c minishell.h
-	@$(CC) -g -c $< -o $@
+	@$(CC) -c $< -o $@
 
 clean:
 	@rm -f $(OBJ)

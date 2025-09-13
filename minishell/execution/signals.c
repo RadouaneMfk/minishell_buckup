@@ -52,10 +52,11 @@ void    free_env(t_env *head)
 
 void handle_end(t_env *env)
 {
+    int ex_status = env->exit_status;
     rl_clear_history();
     free_env(env);
     write(1,"exit\n", 6);
-    exit(env->exit_status);
+    exit(ex_status);
 }
 void setup_signals(void)
 {
