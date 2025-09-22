@@ -6,7 +6,7 @@
 /*   By: rmouafik <rmouafik@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/10 09:30:31 by haboucha          #+#    #+#             */
-/*   Updated: 2025/09/11 12:43:04 by rmouafik         ###   ########.fr       */
+/*   Updated: 2025/09/22 11:54:31 by rmouafik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,9 @@ typedef struct s_token
     char *value;
     t_type type;
     char new_quote;
+    int quoted;
     struct s_token *next;
-}t_token;
+} t_token;
 
 typedef struct s_redriection
 {
@@ -76,7 +77,7 @@ typedef struct s_cmd
 // t_cmd *parse_cmd(t_token *token);
 // void print_cmd(t_cmd *cmd);
 // int ft_isspace(int c);
-
+// char *remove_quotes(char *str);
 int check_quotes(char *input);
 int check_pipe_syntaxe(char *input);
 int check_redirection_syntaxe(char *input);
@@ -95,8 +96,6 @@ t_cmd *parse_cmd(t_token *token);
 void print_cmd(t_cmd *cmd);
 void free_cmd_list(t_cmd *cmd);
 void free_token_list(t_token *token);
-
-
 int ft_isspace(int c);
 
 typedef struct s_env
@@ -105,13 +104,27 @@ typedef struct s_env
     char	*value;
     int     status;
     int     exit_status;
+    char    *prompt;
     struct s_env *next;
 } t_env;
 
+typedef struct s_help
+{
+	int		i;
+	int		start;
+	char	*key;
+	char	*ptr_value;
+    char    *value;
+    int     pos;
+    int     status;
+    int     prev_fd;
+    int     pid;
+	int		pipe_fd[2];
+} t_help;
 
-
+char *ft_strjoin_char(char *s1,char c);
 void expand_token_list(t_token **head,char **envp, t_env *env_head);
-char *expand_string(char *word,char **envp, t_env *env_head);
+char *expand_string(char *word,char **envp, t_env *env_head, int *f);
 char *get_env_value_par(char *var,char **envp);
 int ft_stncmp(char *s1,char *s2,int n);
 int is_valid_env_char(char c);
@@ -119,7 +132,7 @@ int is_valid_env_char(char c);
 
 // -------------- builtins ----------------
 
-
+int     ft_redirect_buil(t_cmd *cmd);
 void	env_add_back(t_env **env_list, t_env *new_node);
 void	env_copy(char **envp, t_env	**env_head);
 void	ft_update_shelvl(t_env *env_list);
@@ -129,16 +142,16 @@ int		ft_cd(char *path, t_env **env_copy);
 int		ft_strcmp(char *s1, char *s2);
 int		ft_echo(char **arr, t_env *env_copy);
 int		ft_unset(char **arr, t_env **env_copy);
-int 	ft_exit(char **arr, t_env **env_copy);
+int 	ft_exit(char **arr, t_env **env_copy, t_cmd *cmd);
 int		ft_export(char **arr, t_env **env_copy);
 char	*get_env_value(t_env **env_copy, char *key);
 int     is_builtin(t_cmd *cmd);
 int     run_builtin(t_cmd *cmd, t_env **env_copy);
-int     ft_execute(t_cmd *cmd, t_env **env_copy, char *input);
+int     ft_execute(t_cmd *cmd, t_env **env_copy, char *input, t_token *res);
 char    **env_to_arr(t_env *env_head);
 void    execute_multiple(t_cmd *cmd, t_env **env_copy);
 void    child_process(t_cmd *cmd, char **env_arr, t_env **env_copy);
-int     ft_herdoc(t_cmd *cmd, t_env **env_copy);
+int     ft_herdoc(t_cmd *cmd, t_env **env_copy, t_token *res);
 void    cmd_built(t_cmd *cmd, t_env **env_copy, int *status);
 void    setup_signals(void);
 void    handle_end(t_env *env);
@@ -147,6 +160,12 @@ void    setup_signals(void);
 void	free_args(char **args);
 void    ft_redirect(t_cmd *cmd);
 void    free_env(t_env *head);
+void	print_error(char *str);
+void	key_value_alloc(t_help var, char *str);
+int     check_long(const char *str);
+void	open_append(int *fd, t_redriection **tmp);
+int		check_exp(char *str, t_env **env_copy);
+void	print_export(t_env **env_copy);
 
 #define ERROR_ARG "minishell: exit: too many arguments\n"
 

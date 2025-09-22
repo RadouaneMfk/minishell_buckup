@@ -6,7 +6,7 @@
 /*   By: rmouafik <rmouafik@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 10:37:35 by rmouafik          #+#    #+#             */
-/*   Updated: 2025/07/02 10:57:03 by rmouafik         ###   ########.fr       */
+/*   Updated: 2025/09/15 11:15:14 by rmouafik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,8 @@
 
 void	remove_env(char *key, t_env	**env_copy)
 {
-	t_env	*current;
-	t_env	*previous;
-
+	t_env (*current), 
+	(*previous);
 	current = *env_copy;
 	previous = NULL;
 	while (current)

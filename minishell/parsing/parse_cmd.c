@@ -6,7 +6,7 @@
 /*   By: rmouafik <rmouafik@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 12:50:48 by haboucha          #+#    #+#             */
-/*   Updated: 2025/09/11 16:44:58 by rmouafik         ###   ########.fr       */
+/*   Updated: 2025/09/17 14:32:05 by rmouafik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@ int count_word_in_token(t_token *token)
 int count_redirect_in_token(t_token *token)
 {
     int count = 0;
+    if (token)
     while(token && token->type != PIPE)
     {
         if(token->type == REDIR_OUT)
@@ -115,23 +116,23 @@ int count_pipe(t_token *token)
     return i;
 }
 
-char *remove_quotes(char *str)
-{
-    int i = 0;
-    int j  =0;
-    int len = ft_strlen(str);
-    char *res = malloc(len +1);
-    if(!res)
-        return NULL;
-    while(str[i])
-    {
-        if(str[i] != '\'' && str[i] != '"')
-            res[j++] = str[i];
-        i++;
-    }
-    res[j] = '\0';
-    return res;
-}
+// char *remove_quotes(char *str)
+// {
+//     int i = 0;
+//     int j  =0;
+//     int len = ft_strlen(str);
+//     char *res = malloc(len +1);
+//     if(!res)
+//         return NULL;
+//     while(str[i])
+//     {
+//         if(str[i] != '\'' && str[i] != '"')
+//             res[j++] = str[i];
+//         i++;
+//     }
+//     res[j] = '\0';
+//     return res;
+// }
 
 t_redriection *new_red(t_type type,char *file)
 {
@@ -157,7 +158,6 @@ void add_red(t_type type, t_cmd *cmd,char *file)
         tmp->next = red;
     }
 }
-
 
 t_cmd *new_cmd(t_token *token)
 {
@@ -185,7 +185,9 @@ t_cmd *new_cmd(t_token *token)
                 || token->type == HEREDOC)
         {
             if(token->next)
+            {
                 add_red(token->type,cmd,token->next->value);
+            }
             token=token->next;
         }
         token = token->next;

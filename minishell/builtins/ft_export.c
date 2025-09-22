@@ -6,7 +6,7 @@
 /*   By: rmouafik <rmouafik@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 11:03:15 by rmouafik          #+#    #+#             */
-/*   Updated: 2025/09/11 13:08:58 by rmouafik         ###   ########.fr       */
+/*   Updated: 2025/09/22 11:59:46 by rmouafik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,39 +88,29 @@ int	check_args(char *str)
 
 int	ft_export(char **arr, t_env **env_copy)
 {
-	char	*value;
-	char	*ptr_value;
-	char	*key;
-	int		pos;
-	int		i;
+	t_help	var;
 
-	i = 1;
-	if (arr[1] == NULL)
-		print_export(env_copy);
-	while (arr[i])
+	var.i = 0;
+	if (check_exp(arr[1], env_copy) == 1)
+		return (1);
+	while (arr[++var.i])
 	{
-		if (check_args(arr[i]) || arr[i] == NULL)
-		{
-			ft_putstr_fd("minishell: export: `", 2);
-			ft_putstr_fd(arr[i], 2);
-			ft_putstr_fd("': not a valid identifier\n", 2);
-			return (1);
-		}
-		if (is_contain_equal(arr[i]))
-		{
-			ptr_value = ft_strchr(arr[i], '=');
-			value = ptr_value + 1;
-			pos = ptr_value - arr[i];
-			key = ft_substr(arr[i], 0, pos);
-		}
+		var.ptr_value = ft_strchr(arr[var.i], '=');
+		var.value = var.ptr_value + 1;
+		var.pos = var.ptr_value - arr[var.i];
+		var.key = ft_substr(arr[var.i], 0, var.pos);
+		if (check_args(var.key) || arr[var.i] == NULL)
+			return (print_error(arr[var.i]), 1);
+		if (is_contain_equal(arr[var.i]))
+			key_value_alloc(var, arr[var.i]);
 		else
 		{
-			key = ft_strdup(arr[i]);
-			value = ft_strdup(get_env_value(env_copy, key));
+			free(var.key);
+			var.key = ft_strdup(arr[var.i]);
+			var.value = ft_strdup(get_env_value(env_copy, var.key));
 		}
-		add_update_env(env_copy, key, value);
-		free(key);
-		i++;
+		add_update_env(env_copy, var.key, var.value);
+		free(var.key);
 	}
 	return (0);
 }

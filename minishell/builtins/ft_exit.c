@@ -6,7 +6,7 @@
 /*   By: rmouafik <rmouafik@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 11:02:49 by rmouafik          #+#    #+#             */
-/*   Updated: 2025/07/02 10:59:38 by rmouafik         ###   ########.fr       */
+/*   Updated: 2025/09/16 11:27:36 by rmouafik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,60 +51,44 @@ int	check_num(char **arr)
 	return (i - 1);
 }
 
-int	check_long(const char *str)
+void	print_error_exit(char *str)
 {
-	unsigned long long	result;
-	unsigned long long	limit;
-	int					sign;
-	int					i;
-
-	result = 0;
-	sign = 1;
-	i = 0;
-	while ((str[i] == 32) || (str[i] >= 9 && str[i] <= 13))
-		i++;
-	if (str[i] == '-' || str[i] == '+')
-	{
-		if (str[i] == '-')
-			sign *= -1;
-		i++;
-	}
-	if (sign < 0)
-		limit = LLONG_MIN;
-	else
-		limit = LLONG_MAX;
-	while (ft_isdigit(str[i]))
-	{
-		if (result > (limit - (str[i] - '0')) / 10)
-			return (0);
-		result = result * 10 + (str[i] - '0');
-		i++;
-	}
-	return (1);
+	ft_putstr_fd("minishell: exit: ", 2);
+	ft_putstr_fd(str, 2);
+	ft_putstr_fd(": numeric argument required\n", 2);
 }
 
-int	ft_exit(char **arr, t_env **env_copy)
+void	print_err_free(char *str, t_cmd *cmd, t_env **env_copy)
 {
+	ft_putstr_fd("minishell: exit: ", 2);
+	ft_putstr_fd(str, 2);
+	ft_putstr_fd(": numeric argument required\n", 2);
+	free_env(*env_copy);
+	free_cmd_list(cmd);
+	exit(5);
+}
+
+int	ft_exit(char **arr, t_env **env_copy, t_cmd *cmd)
+{
+	int	ex_status;
+
 	printf("exit\n");
 	if (arr[1] == NULL)
-		exit((*env_copy)->exit_status);
+	{
+		ex_status = (*env_copy)->exit_status;
+		free_env(*env_copy);
+		free_cmd_list(cmd);
+		exit(ex_status);
+	}
 	if (check_num(arr) != 1)
 		return (ft_putstr_fd(ERROR_ARG, 2), 1);
 	else if (arr[1] != NULL)
 	{
 		if (check_digit(arr[1]))
-		{
-			ft_putstr_fd("minishell: exit: ", 2);
-			ft_putstr_fd(arr[1], 2);
-			ft_putstr_fd(": numeric argument required\n", 2);
-			exit(255);
-		}
+			print_err_free(arr[1], cmd, env_copy);
 		if (!check_long(arr[1]))
-		{
-			ft_putstr_fd("minishell: exit: ", 2);
-			ft_putstr_fd(arr[1], 2);
-			ft_putstr_fd(": numeric argument required\n", 2);
-		}
+			print_error_exit(arr[1]);
+		free_env(*env_copy);
 		exit(ft_atoi(arr[1]));
 	}
 	return (0);

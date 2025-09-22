@@ -6,11 +6,11 @@
 /*   By: rmouafik <rmouafik@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 10:52:52 by rmouafik          #+#    #+#             */
-/*   Updated: 2025/06/23 12:20:23 by rmouafik         ###   ########.fr       */
+/*   Updated: 2025/09/18 09:59:14 by rmouafik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "../minishell.h"
+#include "../minishell.h"
 
 t_env	*ft_lstlast_env(t_env *lst)
 {
@@ -38,7 +38,7 @@ void	env_add_back(t_env **env_list, t_env *new_node)
 
 void	empty_env(t_env *env_node, t_env **env_head)
 {
-	char *path;
+	char	*path;
 
 	env_node = malloc(sizeof(t_env));
 	path = getcwd(NULL, 0);

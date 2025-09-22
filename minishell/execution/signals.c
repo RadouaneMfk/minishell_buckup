@@ -12,55 +12,58 @@
 
 #include "../minishell.h"
 
-void signal_handler(int sig)
+void	signal_handler(int sig)
 {
-    if (sig == SIGINT)
-    {
-        write(1,"\n",1);
-        rl_on_new_line();
-        rl_replace_line("", 0);
-        rl_redisplay();
-        g_signal = SIGINT;
-    }
-    else if (sig == SIGQUIT)
-        return ;
+	if (sig == SIGINT)
+	{
+		write(1, "\n", 1);
+		rl_on_new_line();
+		rl_replace_line("", 0);
+		rl_redisplay();
+		g_signal = SIGINT;
+	}
+	else if (sig == SIGQUIT)
+		return ;
 }
 
-void disable_echoctl(void)
+void	disable_echoctl(void)
 {
-    struct termios term;
+	struct termios	term;
 
-    tcgetattr(STDIN_FILENO, &term);
-    term.c_lflag &= ~ECHOCTL;
-    tcsetattr(STDIN_FILENO, TCSANOW, &term);
+	tcgetattr(STDIN_FILENO, &term);
+	term.c_lflag &= ~ECHOCTL;
+	tcsetattr(STDIN_FILENO, TCSANOW, &term);
 }
 
-void    free_env(t_env *head)
+void	free_env(t_env *head)
 {
-    t_env *tmp;
+	t_env	*tmp;
 
-    while (head)
-    {
-        tmp = head->next;
-        free(head->key);
-        free(head->value);
-        free(head);
-        head = tmp;
-    }
-
+	free(head->prompt);
+	while (head)
+	{
+		tmp = head->next;
+		free(head->key);
+		free(head->value);
+		free(head);
+		head = tmp;
+	}
 }
 
-void handle_end(t_env *env)
+void	handle_end(t_env *env)
 {
-    int ex_status = env->exit_status;
-    rl_clear_history();
-    free_env(env);
-    write(1,"exit\n", 6);
-    exit(ex_status);
+	int	ex_status;
+
+	rl_clear_history();
+	ex_status = env->exit_status;
+	free_env(env);
+	write(1, "exit\n", 6);
+	exit(ex_status);
 }
-void setup_signals(void)
+
+void	setup_signals(void)
 {
-    disable_echoctl();
-    signal(SIGINT, signal_handler);
-    signal(SIGQUIT, SIG_IGN);
+	disable_echoctl();
+	signal(SIGINT, signal_handler);
+	signal(SIGQUIT, SIG_IGN);
 }

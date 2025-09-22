@@ -6,7 +6,7 @@
 /*   By: rmouafik <rmouafik@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/04 14:58:54 by haboucha          #+#    #+#             */
-/*   Updated: 2025/09/10 11:20:16 by rmouafik         ###   ########.fr       */
+/*   Updated: 2025/09/20 11:00:10 by rmouafik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,7 +115,97 @@ char *ft_itoa(int nbr)
     return(p);
 }
 
-char *expand_string(char *word,char **envp, t_env *env_head)
+
+// int has_quotes(char *s)
+// {
+//     int i = 0;
+//     while(s[i])
+//     {
+//         if(s[i] == '\'' || s[i] == '"')
+//             return 1;
+//         i++;
+//     }
+//     return 0;
+// }
+
+char *remove_quotes(char *str)
+{
+    int i = 0;
+    int j  =0;
+    int len = ft_strlen(str);
+    char *res = malloc(len +1);
+    if(!res)
+        return NULL;
+    while(str[i])
+    {
+        if(str[i] != '\'' && str[i] != '"')
+            res[j++] = str[i];
+        i++;
+    }
+    free(str);
+    res[j] = '\0';
+    return res;
+}
+
+// t_token *export_value(char *export)
+// {
+//     t_token *new_token;
+//     new_token = cretae_token(export,WORD);
+//     if(!new_token)
+//         return (NULL);
+//     return(new_token);
+// }
+
+// void free_split(char **value)
+// {
+//     int i = 0;
+//     while(value[i])
+//     {
+//         free(value[i]);
+//         i++;
+//     }
+//     free(value);
+// }
+
+// t_token *export_value(char *export)
+// {
+//     t_token *new_token;
+//     t_token *head;
+//     t_token *tmp;
+//     char    **value;
+//     int i = 0;
+
+//     value =ft_split(export,' ');
+//     if(!value || !value[0])
+//     {
+//         free_split(value);
+//         return NULL;
+//     }
+//     tmp = cretae_token(value[i],WORD);
+//     if(!tmp)
+//     {
+//         free_split(value);
+//         return NULL;
+//     }
+//     head = tmp;
+//     i++;
+//     while(value[i])
+//     {
+//         new_token = cretae_token(value[i],WORD);
+//         if(!new_token)
+//         {
+//             free_split(value);
+//             return NULL;
+//         }
+//         tmp->next = new_token;
+//         tmp = tmp->next;
+//         i++;
+//     }
+//     free_split(value);
+//     return head;
+// }
+
+char *expand_string(char *word,char **envp, t_env *env_head, int *f)
 {
     int i =0;
     int start = 0;
@@ -150,6 +240,7 @@ char *expand_string(char *word,char **envp, t_env *env_head)
         }
         else if(word[i] == '$' && quote !='\'' )
         {
+            (*f)=1;
             i++;
             if(word[i] == '?')
             {
@@ -166,6 +257,7 @@ char *expand_string(char *word,char **envp, t_env *env_head)
             var_name = ft_substr(word,start,i -start);
             value = get_env_value_par(var_name,envp);
             free(var_name);
+            
             if(value)
             {
                     tmp = ft_strjoin(resulat,value);
@@ -184,39 +276,82 @@ char *expand_string(char *word,char **envp, t_env *env_head)
     return(resulat);
 }
 
-// int has_quotes(char *s)
-// {
-//     int i = 0;
-//     while(s[i])
-//     {
-//         if(s[i] == '\'' || s[i] == '"')
-//             return 1;
-//         i++;
-//     }
-//     return 0;
-// }
+int    has_quotes(char *s)
+{
+    int    i;
+
+    if (!s)
+        return (1);
+    i = 0;
+    while (s[i])
+    {
+        if (s[i] == '\'' || s[i] == '"')
+            return (0);
+        i++;
+    }
+    return (1);
+}
 
 void expand_token_list(t_token **head,char **envp, t_env *env_head)
 {
     t_token *tmp = *head;
     t_token *prev = NULL;
+    t_token *res;
+    int f;
+    
     while(tmp)
     {
-        if(tmp->type == HEREDOC)
+        f=0;
+        if (tmp->type == HEREDOC && tmp->next)
         {
-            if(tmp->next)
-                tmp=tmp->next->next;
-            else
-                tmp = tmp->next;
+            if (!has_quotes(tmp->next->value))
+                (*head)->quoted = 1;
+            tmp->next->value = remove_quotes(tmp->next->value);
+            tmp = tmp->next->next;
             continue;
-            
+        }
+        if((tmp->type == REDIR_IN || tmp->type == REDIR_OUT || tmp->type == APPEND) && tmp->next)
+        {
+            if(tmp->next->value && tmp->new_quote != '\'')
+            {
+                char *expanded = expand_string(tmp->next->value,envp,env_head, &f);
+                free(tmp->next->value);
+                tmp->next->value = expanded;
+                if(expanded[0] == '\0' && f == 1)
+                {
+                    tmp = tmp->next->next;
+                    continue;
+                }
+            }
+            tmp = tmp->next->next;
+            continue;
         }
         if(tmp->type == WORD && tmp->value && tmp->new_quote != '\'')
         {
-            char *expanded = expand_string(tmp->value,envp, env_head);
+            char *expanded = expand_string(tmp->value,envp,env_head, &f);
             free(tmp->value);
             tmp->value = expanded;
-            if(tmp->value[0] == '\0')
+            // int i = 0;
+            // while(tmp->value[i])
+            // {
+            //     if(isspace(tmp->value[i]))
+            //     {
+            //         res = export_value(expanded);
+            //         if(prev)
+            //             prev->next = res;
+            //         else
+            //             *head = res;
+            //         t_token *last = res;
+            //         while(last->next)
+            //             last = last->next;
+            //         last->next = tmp->next;
+            //         free(tmp->value);
+            //         free(tmp);
+            //         tmp =last;
+            //     }
+            //     i++;
+            // }
+            if(tmp->value[0] == '\0' && f == 1)
             {
                 t_token *to_free =tmp;
                 if(prev)

@@ -6,7 +6,7 @@
 /*   By: rmouafik <rmouafik@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 11:02:54 by rmouafik          #+#    #+#             */
-/*   Updated: 2025/06/26 10:23:36 by rmouafik         ###   ########.fr       */
+/*   Updated: 2025/09/18 09:56:32 by rmouafik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,38 +56,23 @@ void	add_env(t_env **env_copy, char *key, char *value)
 	env_add_back(env_copy, new_node);
 }
 
-int	ft_cd(char *path, t_env **env_copy)
+static int	cd_oldpwd(char *path, t_env **env_copy, char **pwd)
 {
 	char	*old_path;
-	char	*pwd;
-	char	*home;
 
-	pwd = getcwd(NULL, 0);
-	home = get_env_value(env_copy, "HOME");
-	if (path == NULL || !ft_strcmp(path, "~"))
-	{
-		if (get_env_value(env_copy, "HOME") == NULL)
-		{
-			printf("minishell: cd: HOME not set\n");
-			free(pwd);
-			return (1);
-		}
-		chdir(home);
-		return (free(pwd), 0);
-	}
 	if (!ft_strcmp(path, "-"))
 	{
 		if (get_env_value(env_copy, "OLDPWD") == NULL)
 		{
 			printf("minishell: cd: OLDPWD not set\n");
-			free(pwd);
-			return (1);
+			return (free(*pwd), 1);
 		}
 		old_path = get_env_value(env_copy, "OLDPWD");
-		free(pwd);
-		pwd = getcwd(NULL, 0);
+		free(*pwd);
+		*pwd = getcwd(NULL, 0);
 		if (chdir(old_path) == 0)
 			printf("%s\n", old_path);
+		return (0);
 	}
 	if (chdir(path) != 0 && ft_strcmp(path, "-") 
 		&& ft_strcmp(path, "~") && path != NULL)
@@ -95,17 +80,36 @@ int	ft_cd(char *path, t_env **env_copy)
 		ft_putstr_fd("minishell: cd: ", 2);
 		ft_putstr_fd(path, 2);
 		ft_putstr_fd(": No such file or directory\n", 2);
-		free(pwd);
-		return (1);
+		return (free(*pwd), 1);
 	}
+	return (0);
+}
+
+int	ft_cd(char *path, t_env **env_copy)
+{
+	char *(old_path), *(pwd), *(home), *(cwd);
+	pwd = getcwd(NULL, 0);
+	home = get_env_value(env_copy, "HOME");
+	if (path == NULL || !ft_strcmp(path, "~"))
+	{
+		if (get_env_value(env_copy, "HOME") == NULL)
+		{
+			printf("minishell: cd: HOME not set\n");
+			return (free(pwd), 1);
+		}
+		chdir(home);
+		if (get_env_value(env_copy, "OLDPWD") == NULL)
+			add_env(env_copy, "OLDPWD", pwd);
+		return (free(pwd), 0);
+	}
+	if (cd_oldpwd(path, env_copy, &pwd))
+		return (1);
 	if (get_env_value(env_copy, "OLDPWD") == NULL)
 		add_env(env_copy, "OLDPWD", pwd);
 	if (get_env_value(env_copy, "OLDPWD") != NULL)
 		update_env(env_copy, "OLDPWD", pwd);
-	char *cwd = getcwd(NULL, 0);
+	cwd = getcwd(NULL, 0);
 	if (get_env_value(env_copy, "PWD") != NULL)
 		update_env(env_copy, "PWD", cwd);
-	free(pwd);
-	free(cwd);
-	return (0);
+	return (free(pwd), free(cwd), 0);
 }

@@ -6,7 +6,7 @@
 /*   By: rmouafik <rmouafik@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 12:38:01 by haboucha          #+#    #+#             */
-/*   Updated: 2025/09/11 13:06:11 by rmouafik         ###   ########.fr       */
+/*   Updated: 2025/09/17 12:21:16 by rmouafik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ t_token *cretae_token(char *value, t_type type)
     token->value = ft_strdup(value);
     token->type = type;
     token->next = NULL;
+    token->quoted = 0;
     return (token);
 }
 

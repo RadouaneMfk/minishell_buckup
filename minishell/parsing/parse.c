@@ -6,7 +6,7 @@
 /*   By: rmouafik <rmouafik@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 12:50:48 by haboucha          #+#    #+#             */
-/*   Updated: 2025/09/10 13:21:22 by rmouafik         ###   ########.fr       */
+/*   Updated: 2025/09/15 12:43:00 by rmouafik         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,9 +167,6 @@ t_cmd *new_cmd(t_token *token)
     if(!cmd)
         return NULL;
     initilisation(cmd);
-    red = malloc(sizeof(t_redriection));
-    if(!red)
-        return(free(cmd),NULL);
     int nbr_args = count_word_in_token(token);
     //int nbr_red = count_redirect_in_token(token);
    // int nbr_here= count_heredoc_in_token(token);
